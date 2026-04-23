@@ -1,0 +1,53 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// LCD setup
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+int lm35Pin = A0;
+
+// Function to get stable temperature
+float getTemperature() {
+  int sum = 0;
+
+  for (int i = 0; i < 10; i++) {
+    sum += analogRead(lm35Pin);
+    delay(10);
+  }
+
+  float avg = sum / 10.0;
+  float voltage = avg * (5.0 / 1023.0);
+  float temp = voltage * 100.0;
+
+  return temp;
+}
+
+void setup() {
+  Serial.begin(9600);
+
+  lcd.init();
+  lcd.backlight();
+
+  lcd.setCursor(0, 0);
+  lcd.print("Temp Monitor");
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  float temperature = getTemperature();
+
+  // LCD Display
+  lcd.setCursor(0, 0);
+  lcd.print("Temp: ");
+  lcd.print(temperature, 1);
+  lcd.print((char)223);
+  lcd.print("C   ");
+
+  // Serial Output
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" C");
+
+  delay(1000);
+}
